@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace GDI
 {
     public partial class Form1 : Form
@@ -19,13 +20,20 @@ namespace GDI
         Rectangle rectangle;
         List<Control> selectedItems = new List<Control>();
         List<AreaComment> comments_lst = new List<AreaComment>();
-
+        Graphics graphics;
+        Bitmap bitmap;
+        Pen pen = new Pen(Color.Black, 3f);
 
         public Form1()
         {
             InitializeComponent();
             addElementsToList();
-          
+            bitmap = new Bitmap(pictureBox2.Height, pictureBox2.Width);
+            pictureBox2.Image = bitmap;
+            graphics = Graphics.FromImage(bitmap);
+            this.Size = new Size(800, 670);
+
+
         }
         private void addElementsToList()
         {
@@ -148,6 +156,56 @@ namespace GDI
                 var area = new AreaComment(textBox1.Text, _rectangle);
                 comments_lst.Add(area);
             };
+        }
+
+        private void pictureBox2_MouseDown(object sender, MouseEventArgs e)
+        {
+            start = e.Location;
+        }
+
+        private void pictureBox2_MouseUp(object sender, MouseEventArgs e)
+        {
+            finish = e.Location;
+            graphics.DrawLine(pen, start, finish);
+            pictureBox2.Invalidate();
+        }
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            SaveFile();
+        }
+        private void SaveFile()
+        {
+            MessageBox.Show("Save as...");
+            SaveFileDialog sf = new SaveFileDialog();
+            sf.Title = "Сохранить как...";
+            sf.OverwritePrompt = true; 
+            sf.CheckFileExists = true; 
+            sf.Filter = "Image (bitmap) files | *.bmp";
+            sf.ShowHelp = true; 
+            if (sf.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    pictureBox2.Image.Save(sf.FileName);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+            }
+        }
+
+   
+
+        private void buttonColor_MouseClick(object sender, MouseEventArgs e)
+        {
+            pen.Color = ((Button)sender).BackColor;
+        }
+
+        private void FontSize_ValueChanged(object sender, EventArgs e)
+        {
+            pen.Width = FontSize.Value;
         }
     }
 }
